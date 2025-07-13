@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户UA信息查看器</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .ua-display {
+            background-color: #f8f9fa;
+            border: 1px solid #e1e4e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-size: 0.9em;
+            position: relative;
+            overflow-x: auto;
+        }
+        .copy-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .copy-btn:hover {
+            background-color: #45a049;
+        }
+        .copy-btn:active {
+            transform: translateY(1px);
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .notification.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>您的浏览器信息</h1>
+        <p>下面是您的User Agent (UA)字符串：</p>
+        <div class="ua-display" id="uaString">正在获取...</div>
+        <button class="copy-btn" id="copyBtn">复制到剪贴板</button>
+    </div>
+
+    <div class="notification" id="notification">已成功复制到剪贴板！</div>
+
+    <script>
+        // 获取显示区域和按钮元素
+        const uaDisplay = document.getElementById('uaString');
+        const copyButton = document.getElementById('copyBtn');
+        const notification = document.getElementById('notification');
+        
+        // 获取并显示UA字符串
+        const userAgent = navigator.userAgent;
+        uaDisplay.textContent = userAgent;
+        
+        // 复制功能
+        copyButton.addEventListener('click', async () => {
+            try {
+                // 使用现代剪贴板API
+                await navigator.clipboard.writeText(userAgent);
+                showNotification();
+            } catch (err) {
+                // 回退到传统方法
+                const textArea = document.createElement('textarea');
+                textArea.value = userAgent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    // 尝试执行复制命令
+                    const successful = document.execCommand('copy');
+                    showNotification();
+                } catch (copyErr) {
+                    console.error('复制失败:', copyErr);
+                    alert('复制失败，请手动选择文本复制。');
+                }
+                
+                document.body.removeChild(textArea);
+            }
+        });
+        
+        // 显示通知
+        function showNotification() {
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
